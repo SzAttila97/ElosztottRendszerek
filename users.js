@@ -3,7 +3,10 @@ const mongodb = require("mongodb");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
-const userMiddleWae = require("./validation")
+const userMiddleWae = require("./validation");
+const auth = require("./auth");
+const passport = require("passport");
+const ensureLogin = require("connect-ensure-login");
 
 
 router.get("/", async (req, res) => {
@@ -37,6 +40,19 @@ router.post("/register", async (req, res) => {
     });
     res.send("inserted");
 });
+
+router.get("/login/facebook", passport.authenticate("facebook"), (req, res)=>{
+    res.send(req.user);
+})
+
+router.get("/wellcome", ensureLogin.ensureLoggedIn, (req, res)=>{
+    res.send(res.user);
+})
+
+router.get('/login/facebook/callback',
+  passport.authenticate('facebook', { successRedirect: '/',
+                                      failureRedirect: '/login' })
+                                      );
 
 router.post("/login", async(req, res)=>{
     let email = req.body.email
